@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> Names List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: ltr;
+      text-align: left;
+      margin: 20px;
+      background: #f9f9f9;
+      color: #333;
+    }
+    h1 {
+      color: #007BFF;
+    }
+    form {
+      max-width: 500px;
+      margin-bottom: 20px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    form label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    form input {
+      width: 90%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    form button {
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    form button:hover {
+      background: #0056b3;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      width: 500px;
+      margin: 10px 0;
+      padding: 15px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+<h1>Names List</h1>
+<form id="dataForm">
+  <label>
+    Name:
+    <input type="text" id="name" placeholder="Enter name" required>
+  </label>
+  <label>
+    Age:
+    <input type="number" id="age" placeholder="Enter age" required>
+  </label>
+  <label>
+    Email:
+    <input type="email" id="email" placeholder="Enter email" required>
+  </label>
+  <button type="submit">Add</button>
+</form>
+<h2>List:</h2>
+<ul id="namesList"></ul>
+
+<script>
+  const socket = new WebSocket('ws://localhost:8080');
+
+  socket.addEventListener('message', (event) => {
+    const message = JSON.parse(event.data);
+    if (message.type === 'updateList') {
+      const list = document.getElementById('namesList');
+      list.innerHTML = '';
+      message.data.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `Name: ${item.name}, Age: ${item.age}, Email: ${item.email}`;
+        list.appendChild(li);
+      });
+    }
+  });
+
+  document.getElementById('dataForm').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const name = document.getElementById('name').value;
+    const age = document.getElementById('age').value;
+    const email = document.getElementById('email').value;
+    socket.send(JSON.stringify({ type: 'addItem', data: { name, age, email } }));
+    event.target.reset();
+  });
+</script>
+</body>
+</html>
